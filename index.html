@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Sorpresa Especial!</title>
+    <style>
+        :root {
+            --bg-color: #090909;
+            --piso1: #ff7675; --piso2: #fab1a0; --piso3: #74b9ff;
+            --glaseado: #ffffff;
+        }
+
+        body {
+            margin: 0; background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%);
+            color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden; display: flex; flex-direction: column; align-items: center; height: 100vh;
+        }
+
+        /* --- PANTALLA INICIAL (BOTÓN) --- */
+        #start-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; justify-content: center; align-items: center; flex-direction: column;
+            background: rgba(0,0,0,0.8); z-index: 100;
+            transition: opacity 0.5s;
+        }
+
+        .start-btn {
+            background: linear-gradient(45deg, #ff007a, #74b9ff);
+            border: none; padding: 20px 40px; color: white;
+            font-size: 1.5rem; border-radius: 50px; cursor: pointer;
+            box-shadow: 0 0 20px rgba(255, 0, 122, 0.5);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* --- TORTA CENTRADA --- */
+        .cake-container {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); /* Centrado perfecto */
+            display: none; /* Se activa con JS */
+            flex-direction: column; align-items: center;
+        }
+
+        /* Animación de Rebote para los pisos */
+        @keyframes bounceDrop {
+            0% { transform: translateY(-500px); opacity: 0; }
+            60% { transform: translateY(20px); opacity: 1; }
+            80% { transform: translateY(-10px); }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        .layer {
+            position: relative; border-radius: 10px; opacity: 0; width: 100%;
+            box-shadow: inset -5px -5px 10px rgba(0,0,0,0.1);
+        }
+
+        /* Decoración de Glaseado */
+        .layer::after {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 15px;
+            background: var(--glaseado); border-radius: 10px 10px 5px 5px;
+        }
+
+        .piso3 { width: 120px; height: 50px; background: var(--piso3); z-index: 3; animation: bounceDrop 0.8s 0.5s forwards; }
+        .piso2 { width: 180px; height: 60px; background: var(--piso2); z-index: 2; margin-top: -10px; animation: bounceDrop 0.8s 1.0s forwards; }
+        .piso1 { width: 240px; height: 70px; background: var(--piso1); z-index: 1; margin-top: -10px; animation: bounceDrop 0.8s 1.5s forwards; }
+
+        /* --- VELA --- */
+        .vela-container {
+            position: absolute; top: -45px;
+            display: flex; flex-direction: column; align-items: center;
+            opacity: 0; animation: simpleFade 1s 2.5s forwards; z-index: 0;
+        }
+
+        @keyframes simpleFade { to { opacity: 1; } }
+
+        .vela {
+            width: 12px; height: 35px;
+            background: repeating-linear-gradient(45deg, #fff, #fff 5px, #ff007a 5px, #ff007a 10px);
+        }
+
+        .llama {
+            width: 15px; height: 25px; background: orange;
+            border-radius: 50% 50% 20% 20%;
+            box-shadow: 0 0 10px orange, 0 0 20px yellow, 0 0 60px white;
+            animation: flicker 0.1s infinite alternate;
+        }
+        @keyframes flicker { 0% { transform: scale(1); opacity: 0.9; } 100% { transform: scale(1.1); opacity: 1; } }
+
+        /* --- TARJETA FINAL GIRATORIA --- */
+        .final-card-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            display: none; justify-content: center; align-items: center;
+            perspective: 1000px; /* Para efecto 3D */
+            z-index: 20;
+        }
+
+        .flip-card {
+            width: 300px; height: 400px;
+            background: white; color: #333;
+            border-radius: 20px;
+            padding: 30px; text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            transform-style: preserve-3d;
+            transform: rotateY(90deg); /* Empieza de lado (invisible) */
+            animation: flipIn 1.5s 4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+
+        @keyframes flipIn {
+            0% { transform: rotateY(90deg) scale(0.5); opacity: 0; }
+            100% { transform: rotateY(0deg) scale(1); opacity: 1; }
+        }
+
+        .confetti { position: absolute; width: 10px; height: 10px; z-index: -1; }
+
+    </style>
+</head>
+<body>
+
+    <div id="start-screen">
+        <h2 style="margin-bottom: 20px;">Tienes un mensaje pendiente...</h2>
+        <button class="start-btn" onclick="startShow()">🎁 ABRIR SORPRESA</button>
+    </div>
+
+    <div class="cake-container" id="cake">
+        <div class="vela-container">
+            <div class="llama"></div>
+            <div class="vela"></div>
+        </div>
+        <div class="layer piso3"></div>
+        <div class="layer piso2"></div>
+        <div class="layer piso1"></div>
+    </div>
+
+    <div class="final-card-container" id="card">
+       <div class="flip-card">
+    <div style="font-size: 3rem; margin-bottom: 10px;">🎉</div>
+    <h2 style="color: #74b9ff; margin: 0; font-size: 1.8rem;">¡Nivel Desbloqueado!</h2>
+    
+    <p style="margin: 15px 0; font-size: 0.95rem; line-height: 1.5; color: #555;">
+        Dicen que lo bueno mejora con los años, ¡así que tú debes estar llegando a la perfección! Prepárate porque hoy se celebra como se debe. Prohibido estar triste hoy.
+    </p>
+
+    <div style="border-top: 1px solid #eee; width: 100%; margin: 15px 0;"></div>
+    
+    <p style="font-weight: bold; font-size: 1rem; color: #333;">🎁 Premio por sobrevivir otro año:</p>
+    <div style="background: #f0f0f0; padding: 10px; border-radius: 8px; color: #0984e3; font-weight: bold;">
+        Vale por: Comida & Buena Charla 🍔
+        <br><span style="font-size: 0.7rem; color: #888;">(Yo invito, tú eliges)</span>
+    </div>
+</div>
+    </div>
+
+    <script>
+        function startShow() {
+            // 1. Ocultar pantalla de inicio
+            document.getElementById('start-screen').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('start-screen').style.display = 'none';
+                
+                // 2. Mostrar Torta y lanzar confeti
+                document.getElementById('cake').style.display = 'flex';
+                launchConfetti();
+
+                // 3. Preparar la tarjeta final
+                document.getElementById('card').style.display = 'flex';
+            }, 500);
+        }
+
+        function launchConfetti() {
+            const colors = ['#ff007a', '#74b9ff', '#ffeaa7', '#55efc4'];
+            for(let i=0; i<50; i++) {
+                const c = document.createElement('div');
+                c.classList.add('confetti');
+                c.style.left = Math.random() * 100 + 'vw';
+                c.style.top = -10 + 'px';
+                c.style.background = colors[Math.floor(Math.random() * colors.length)];
+                document.body.appendChild(c);
+
+                c.animate([
+                    { transform: 'translateY(0) rotate(0)', opacity: 1 },
+                    { transform: `translateY(100vh) rotate(${Math.random() * 360}deg)`, opacity: 0 }
+                ], {
+                    duration: Math.random() * 2000 + 3000,
+                    easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
+                    iterations: 1
+                });
+            }
+        }
+    </script>
+</body>
+</html>
